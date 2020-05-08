@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+  PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+  "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+
+	<context id="MySQLTables" targetRuntime="MyBatis3">
+
+		<!-- 抑制注释生成 -->
+		<commentGenerator>
+			<property name="suppressAllComments" value="true" />
+		</commentGenerator>
+
+
+		<!-- mvn mybatis-generator:generate 配置数据库位置 ，配置虚拟机上的mysql ip地址；不采用安全协议连接，否则无法逆向生成 -->
+		<jdbcConnection driverClass="com.mysql.jdbc.Driver"
+			connectionURL="jdbc:mysql://localhost:3306/crowd_funding?useSSL=false"
+			userId="root" password="123456">
+		</jdbcConnection>
+
+
+		<javaTypeResolver>
+			<property name="forceBigDecimals" value="false" />
+		</javaTypeResolver>
+
+
+		<!-- javaBean生成在哪里 -->
+		<javaModelGenerator targetPackage="com.atguigu.atcrowdfunding.bean"
+			targetProject="..\atcrowdfunding-bean\src\main\java">
+			<property name="enableSubPackages" value="true" />
+			<!-- 数据库中数据带有空格的话自动去掉 -->
+			<property name="trimStrings" value="true" />
+		</javaModelGenerator>
+
+		<!-- sqlMap sql映射文件（xml mapper文件） -->
+		<sqlMapGenerator targetPackage="mybatis.mapper"
+			targetProject="..\atcrowdfunding-manager-impl\src\main\resources">
+			<property name="enableSubPackages" value="true" />
+		</sqlMapGenerator>
+
+		<!-- javaClient：java接口生成的地方 -->
+		<javaClientGenerator type="XMLMAPPER"
+			targetPackage="com.atguigu.atcrowdfunding.mapper" targetProject="..\atcrowdfunding-manager-api\src\main\java">
+			<property name="enableSubPackages" value="true" />
+		</javaClientGenerator>
+
+		<!-- %是指匹配所有的数据库中的表，去生成对应的实体类 -->
+		<table schema="" tableName="%"></table>
+		<!-- <table schema="TPermission" tableName="t_permission"></table> -->
+	</context>
+</generatorConfiguration> 

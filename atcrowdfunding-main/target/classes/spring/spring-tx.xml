@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+
+	<context:property-placeholder location="classpath:/config/jdbc.properties" />
+ 
+
+	<!-- 阿里的数据库连接池Druid：获取数据库的操作 -->
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+		<property name="username" value="${datasource.username}"></property>
+		<property name="password" value="${datasource.password}"></property>
+		<property name="url" value="${datasource.url}"></property>
+		<property name="driverClassName" value="${datasource.driver}"></property>
+	</bean>
+
+	<!-- 事务管理器：控制着数据源 -->
+	<bean id="tm" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+	<property name="dataSource" ref="dataSource"></property>
+    </bean>
+
+	<!-- 配置版的事务切面 -->
+	<aop:config>
+		<!-- *任意返回值 service包下 ..service下的任意包 *任意类 .*任意方法 (..)任意参数 -->
+		<aop:pointcut expression="execution(* com.atguigu.atcrowdfunding.service..*.*(..))" id="point" />
+		<!-- advice-ref：关联增强事务 pointcut-ref：关联事务的切入点 -->
+		<aop:advisor advice-ref="tx" pointcut-ref="point" />
+	</aop:config>
+
+	<!-- 配置事务增强 -->
+	<tx:advice transaction-manager="tm" id="tx">
+		<!-- 事务属性 -->
+		<tx:attributes>
+			<!-- 所有 方法都是事务 -->
+			<!-- 请求得到数据是不需要写，所以只读能够增加查询效率 -->
+			<tx:method name="get*" read-only="true" />
+			<tx:method name="list*" read-only="true" />
+
+			<!--增删改 
+				REQUIRED:表示当前方法必须在一个事务中运行，这是一事务传播行为，共有七种
+					如果一个没有事务的方法a调用这个方法b,方法b会自己开启新的事务
+					如果一个有事务的方法a调用这个方法b,这样，b方法会加入到a方法的事务中去
+				REQUIRES_NEW:表示当前方法必须在一个新的事务中
+					无论方法a是不是有事务，方法a调用方法b,总要为方法b创建新的事务
+					
+				isolation:四个隔离级别
+					1 READ_UNCOMMITTED  不可提交读
+						解决问题:数据丢失
+					
+					2 READ_COMMITTED  提交读
+						解决问题：数据丢失，脏读
+					
+					4 REPEATABLE_READ 可重复读，没开一个窗口他们之间读写数据是独立的，不管事务有没有commit都读写结果都是一样的，
+					幻读是因为两个事务独立改变，在开一个新的事务结果不一定是最新的，导致两个事务查询结果不同
+					 	解决问题：数据丢失，脏读，不可重复读
+					 
+					8 SERIALIZABLE 串行化，不可并发 ，
+						解决问题：数据丢失，脏读，不可重复读，幻读
+						
+					级别越高，安全性越高，但是效率越低
+					mysql默认的隔离等级：REPEATABLE_READ
+					oracle默认的隔离等级：READ_COMMITTED
+					没有事务隔离可能出现问题：
+					  数据丢失，脏读，不可重复读，幻读
+					  
+					  rollback-for:指在什么异常情况下回滚事务
+					  默认事务回滚策略：遇到RuntimeException时回滚，遇到编译时异常默认不会回滚事务。
+					  使用rollback-for:来修改事务回滚策略
+			-->
+			<tx:method name="save*" propagation="REQUIRES_NEW" timeout="5000" isolation="DEFAULT" rollback-for="java.lang.Exception"/>
+			<tx:method name="update*" timeout="5000" />
+			<tx:method name="delete*" timeout="5000" />
+			
+			<!-- 兜底 -->	
+			<tx:method name="*" />
+		</tx:attributes>
+	</tx:advice>
+
+</beans>

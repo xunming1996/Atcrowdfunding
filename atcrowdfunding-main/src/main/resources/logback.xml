@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+	<!-- 配置不同的appender,就可以设置日志输出向控制台，文件等 -->
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%-4relative [%thread] %-5level %logger{35} - %msg %n</pattern>
+		</encoder>
+	</appender>
+	
+	<!-- debug < info < warn < error < fatal
+		指定日志级别，系统就会输出别指定级别高的日志。、
+		一般生产环境使用error，开发测试环境使用debug，越多越好
+	 -->
+	<root level="debug">
+		<appender-ref ref="STDOUT" />
+	</root>
+
+</configuration>

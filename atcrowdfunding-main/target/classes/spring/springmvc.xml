@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+
+		<!-- use-default-filter默认是true，需要配置成false，因为spring容器中也注册了service，springmvc中也注册了，
+			controller在调用service时会有两个，会采取就近原则，使用springmvc中的service，但是springmvc中没有配置事务，
+			事务是由spring管理的。若为true就会扫描service，false就不会了只会扫描controller。
+		-->
+	<context:component-scan base-package="com.atguigu.atcrowdfunding.controller" use-default-filters="false">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+<!-- 		<context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice" /> -->
+	</context:component-scan>
+
+	<!-- springmvc的标配：视图解析器 -->
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/jsp/"></property>
+		<property name="suffix" value=".jsp"></property>
+	</bean>
+
+	<!-- 开启SpringMVC高级模式 -->
+	<mvc:annotation-driven />
+	<!-- 放行静态资源访问 -->
+	<mvc:default-servlet-handler />
+
+</beans>
